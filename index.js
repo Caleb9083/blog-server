@@ -12,7 +12,7 @@ const blogPosts = [
         blogMessage: "Lorem ipsum filler text",
         likes: 1,
         unlikes: 1,
-        comments: [{ message: "I am commenting", reply: [{rep: "I have replied 1"}] },
+        comments: [{ message: "I am commenting", reply: [ "I have replied 1", "Nice Story" ] },
         { message: "This is my next comment", }
     ],
         banner: "Image Source"
@@ -29,14 +29,10 @@ const blogPosts = [
 ];
 
 
-const schemas = gql`
-    type Reply {
-        rep: String!
-    }
-
+const schemas = gql`   
     type Comment {
         message: String!
-        reply: [Reply]
+        reply: [String]
     }
 
     type BlogPost {
@@ -67,6 +63,7 @@ const schemas = gql`
         ): BlogPost
         commentOnBlog(title: String!, comments: String!): BlogPost
         deleteBlog(title: String!): BlogPost
+        deleteCommentOnBlog(title: String!, comment: String!): BlogPost
     }
 `;   
 
@@ -116,6 +113,17 @@ const blogsResolvers = {
                 const index = blogPosts.indexOf(blog)
                 blogPosts.splice(index, 1)
             } 
+        },
+        deleteCommentOnBlog: (parent, args) => {
+            const blog = blogPosts.find(blog => blog.title === args.title)
+            if (blog){
+                const comments = blog.comments
+                const comment = comments.find(comment => comment.message === args.comment)
+                if (comment){
+                    const index = comments.indexOf(comment)
+                    comments.splice(index, 1)
+                }
+            }
         }
        
     }
