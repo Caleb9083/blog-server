@@ -7,12 +7,14 @@ const port = process.env.PORT || 3000
 
 const blogPosts = [
     {
-        title: "Harry Kaine and the Chamber of Secrets",
+        title: "Make Money",
         author: "J.K Rowlings",
         blogMessage: "Lorem ipsum filler text",
         likes: 1,
         unlikes: 1,
-        comments: [],
+        comments: [{ message: "I am commenting", reply: [{rep: "I have replied 1"}] },
+        { message: "This is my next comment", }
+    ],
         banner: "Image Source"
     },
     {
@@ -28,12 +30,22 @@ const blogPosts = [
 
 
 const schemas = gql`
+    type Reply {
+        rep: String!
+    }
+
+    type Comment {
+        message: String!
+        reply: [Reply]
+    }
+
     type BlogPost {
         title: String!
         author: String!
         blogMessage: String
         likes: Int
-        comments: [String]
+        unlikes: Int
+        comments: [Comment]
         banner: String
     }
 
@@ -43,9 +55,18 @@ const schemas = gql`
     }
 
     type Mutation {
-        createBlog(title: String!, author: String!): BlogPost
+        createBlog(title: String!, author: String!, blogMessage: String!): BlogPost
         likeBlog(title: String!): BlogPost
         unLikeBlog(title: String!): BlogPost
+        updateBlog(
+            title: String!,
+            newTitle: String,
+            author: String,
+            blogMessage: String,
+            banner: String
+        ): BlogPost
+        commentOnBlog(title: String!, comments: String!): BlogPost
+        deleteBlog(title: String!): BlogPost
     }
 `;   
 
@@ -56,8 +77,8 @@ const blogsResolvers = {
     },
     Mutation: {
         createBlog:  (parent, args) => {
-            const { title, author, likes } = args;
-            const blog = { title, author, likes: 0 };
+            const { title, author, blogMessage, } = args;
+            const blog = { title, author, blogMessage, likes: 0 , unlikes: 0, comments: [] };
             blogPosts.push(blog);
             return blog;
         },
@@ -70,7 +91,33 @@ const blogsResolvers = {
             const blog = blogPosts.find(blog => blog.title === args.title)
             blog.likes+=1
             return blog
+        },
+        updateBlog: (parent, args) => {
+            const blog = blogPosts.find(blog => blog.title === args.title) 
+            if (blog){
+                blog.title = args.newTitle ? args.newTitle : args.title
+                blog.author = args.author
+                blog.blogMessage = args.blogMessage
+                blog.banner = args.banner
+                return blog
+            }else{
+                return "Blog not found"
+            }    
+        },
+        commentOnBlog: (parent, args) => {
+            const blog = blogPosts.find(blog => blog.title === args.title)
+            if (blog && args.comments ){
+                blog.comments.push({message: args.comments })
+            }
+        },
+        deleteBlog: (parent, args) => {
+            const blog = blogPosts.find(blog => blog.title === args.title)
+            if (blog) {
+                const index = blogPosts.indexOf(blog)
+                blogPosts.splice(index, 1)
+            } 
         }
+       
     }
 }
 
@@ -84,4 +131,3 @@ const server = new ApolloServer({
 server.listen( port ).then(({ url, port }) => {
     console.log(`Server ready at ${url}`)
 }).catch(err => console.log(err));
-
