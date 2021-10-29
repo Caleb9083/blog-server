@@ -1,9 +1,6 @@
 const {ApolloServer, gql} = require("apollo-server")
-const { ApolloServerPluginLandingPageLocalDefault, ApolloServerPluginLandingPageProductionDefault } = require("apollo-server-core");
-
 
 const port = process.env.PORT || 3000
-
 
 const blogPosts = [
     {   id: 1,
@@ -148,15 +145,6 @@ const server = new ApolloServer({
     resolvers: blogsResolvers,
     playground: true,
     introspection: true,
-    plugins: [
-        // Install a landing page plugin based on NODE_ENV
-        process.env.NODE_ENV === 'production'
-          ? ApolloServerPluginLandingPageProductionDefault({
-              graphRef: "my-graph-id@my-graph-variant",
-              footer: false,
-            })
-          : ApolloServerPluginLandingPageLocalDefault({ footer: false }),
-      ],
  });
 
 server.listen( port ).then(({ url, port }) => {
