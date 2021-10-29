@@ -2,8 +2,6 @@ const {ApolloServer, gql} = require("apollo-server")
 
 const port = process.env.PORT || 3000
 
-//Schemas
-// Resolvers
 
 const blogPosts = [
     {
@@ -98,21 +96,27 @@ const blogsResolvers = {
                 blog.banner = args.banner
                 return blog
             }else{
-                return "Blog not found"
+                 throw new Error("Blog not found")
             }    
         },
         commentOnBlog: (parent, args) => {
             const blog = blogPosts.find(blog => blog.title === args.title)
             if (blog && args.comments ){
                 blog.comments.push({message: args.comments })
-            }
+                return blog
+            }else{
+                throw new Error("Blog not found")
+           }  
         },
         deleteBlog: (parent, args) => {
             const blog = blogPosts.find(blog => blog.title === args.title)
             if (blog) {
                 const index = blogPosts.indexOf(blog)
                 blogPosts.splice(index, 1)
-            } 
+                return blog
+            }else{
+                throw new Error("Blog not found")
+           }   
         },
         deleteCommentOnBlog: (parent, args) => {
             const blog = blogPosts.find(blog => blog.title === args.title)
@@ -122,8 +126,13 @@ const blogsResolvers = {
                 if (comment){
                     const index = comments.indexOf(comment)
                     comments.splice(index, 1)
-                }
-            }
+                    return blog
+                }else{
+                    throw new Error("comment not found")
+               }  
+            }else{
+                throw new Error("Blog not found")
+           }  
         }
        
     }
