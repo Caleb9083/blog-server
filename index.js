@@ -1,21 +1,26 @@
 const {ApolloServer, gql} = require("apollo-server")
+const { ApolloServerPluginLandingPageLocalDefault, ApolloServerPluginLandingPageProductionDefault } = require("apollo-server-core");
+
 
 const port = process.env.PORT || 3000
 
 
 const blogPosts = [
-    {
+    {   id: 1,
         title: "Make Money",
         author: "J.K Rowlings",
         blogMessage: "Lorem ipsum filler text",
         likes: 1,
         unlikes: 1,
-        comments: [{ comment: "I am commenting", reply: [ "I have replied 1", "Nice Story" ] },
+        comments: [
+            { 
+            comment: "I am commenting", 
+            reply: [ "I have replied 1", "Nice Story" ] },
         { comment: "This is my next comment", }
     ],
-        banner: "Image Source"
+        banner: "Image source"
     },
-    {
+    {   
         title: "Jurassic Park",
         author: "Micheal Crichton",
         blogMessage: "Lorem ipsum filler text",
@@ -102,7 +107,7 @@ const blogsResolvers = {
         commentOnBlog: (parent, args) => {
             const blog = blogPosts.find(blog => blog.title === args.title)
             if (blog && args.comments ){
-                blog.comments.push({comment: args.comments })
+                blog.comments.push({comment: args.comments, })
                 return blog
             }else{
                 throw new Error("Blog not found")
@@ -142,7 +147,16 @@ const server = new ApolloServer({
     typeDefs: schemas, 
     resolvers: blogsResolvers,
     playground: true,
-    introspection: true
+    introspection: true,
+    plugins: [
+        // Install a landing page plugin based on NODE_ENV
+        process.env.NODE_ENV === 'production'
+          ? ApolloServerPluginLandingPageProductionDefault({
+              graphRef: "my-graph-id@my-graph-variant",
+              footer: false,
+            })
+          : ApolloServerPluginLandingPageLocalDefault({ footer: false }),
+      ],
  });
 
 server.listen( port ).then(({ url, port }) => {
