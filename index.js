@@ -10,8 +10,8 @@ const blogPosts = [
         blogMessage: "Lorem ipsum filler text",
         likes: 1,
         unlikes: 1,
-        comments: [{ message: "I am commenting", reply: [ "I have replied 1", "Nice Story" ] },
-        { message: "This is my next comment", }
+        comments: [{ comment: "I am commenting", reply: [ "I have replied 1", "Nice Story" ] },
+        { comment: "This is my next comment", }
     ],
         banner: "Image Source"
     },
@@ -29,7 +29,7 @@ const blogPosts = [
 
 const schemas = gql`   
     type Comment {
-        message: String!
+        comment: String!
         reply: [String]
     }
 
@@ -102,7 +102,7 @@ const blogsResolvers = {
         commentOnBlog: (parent, args) => {
             const blog = blogPosts.find(blog => blog.title === args.title)
             if (blog && args.comments ){
-                blog.comments.push({message: args.comments })
+                blog.comments.push({comment: args.comments })
                 return blog
             }else{
                 throw new Error("Blog not found")
@@ -122,7 +122,7 @@ const blogsResolvers = {
             const blog = blogPosts.find(blog => blog.title === args.title)
             if (blog){
                 const comments = blog.comments
-                const comment = comments.find(comment => comment.message === args.comment)
+                const comment = comments.find(comment => comment.comment === args.comment)
                 if (comment){
                     const index = comments.indexOf(comment)
                     comments.splice(index, 1)
